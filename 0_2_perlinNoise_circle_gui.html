@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script src="/lib/p5.js"></script>
+    <script src="/lib/dat.gui.js"></script>
+  </head>
+
+  <script>
+  var settings = {
+    background: [160, 130, 130],
+    stroke: [0, 0, 0, 50],
+    canvasSize: {
+      width: {
+        value: 256,
+        min: 0,
+        max: 1024,
+        name: 'canvasSizeWidth'
+      },
+      height: {
+        value: 256,
+        min: 0,
+        max: 1024,
+        name: 'canvasSizeHeight'
+      }
+    },
+    noiseIncrement: {
+      x: {
+        value: 0.04,
+        min: 0.0,
+        max: 1.0,
+        name: 'noiseIncrementX'
+      },
+      y: {
+        value: 0.04,
+        min: 0.0,
+        max: 1.0,
+        name: 'noiseIncrementY'
+      }
+    },
+    translateRatio: {
+      value: 4,
+      min: 0,
+      max: 10,
+      name: 'translateRatio'
+    },
+    edgeSizeRatio: {
+      value: 10,
+      min: 0,
+      max: 100,
+      name: 'edgeSizeRatio'
+    },
+    range: {
+      width: {
+        value: 64,
+        min: 0,
+        max: 256,
+        name: 'rangeWidth'
+      },
+      height: {
+        value: 64,
+        min: 0,
+        max: 256,
+        name: 'rangeHeight'
+      }
+    },
+    step: {
+      value: 0.4,
+      min: 0.3,
+      max: 1.0,
+      name: 'step'
+    }
+  }
+
+  function setup() {
+    // p5js
+    setupRendererAndRender();
+
+    // gui
+    var gui = new dat.GUI();
+    gui.addColor(settings, 'background').onChange(render);
+    gui.addColor(settings, 'stroke').onChange(render);
+    gui.add(settings.canvasSize.width, 'value', settings.canvasSize.width.min, settings.canvasSize.width.max).name(settings.canvasSize.width.name).onChange(setupRendererAndRender);
+    gui.add(settings.canvasSize.height, 'value', settings.canvasSize.height.min, settings.canvasSize.height.max).name(settings.canvasSize.height.name).onChange(setupRendererAndRender);
+    gui.add(settings.noiseIncrement.x, 'value', settings.noiseIncrement.x.min, settings.noiseIncrement.x.max).name(settings.noiseIncrement.x.name).onChange(render);
+    gui.add(settings.noiseIncrement.y, 'value', settings.noiseIncrement.y.min, settings.noiseIncrement.y.max).name(settings.noiseIncrement.y.name).onChange(render);
+    gui.add(settings.translateRatio, 'value', settings.translateRatio.min, settings.translateRatio.max).name(settings.translateRatio.name).onChange(render);
+    gui.add(settings.edgeSizeRatio, 'value', settings.edgeSizeRatio.min, settings.edgeSizeRatio.max).name(settings.edgeSizeRatio.name).onChange(render);
+    gui.add(settings.range.width, 'value', settings.range.width.min, settings.range.width.max).name(settings.range.width.name).onChange(render);
+    gui.add(settings.range.height, 'value', settings.range.height.min, settings.range.height.max).name(settings.range.height.name).onChange(render);
+    gui.add(settings.step, 'value', settings.step.min, settings.step.max).name(settings.step.name).onChange(render);
+
+  }
+
+  function setupRendererAndRender(){
+    setupRenderer();
+    render();
+
+    function setupRenderer(){
+      createCanvas(settings.canvasSize.width.value, settings.canvasSize.height.value, P2D);
+      translate(width / 2.0, height / 2.0);
+    }
+  }
+
+  function render(){
+    background(settings.background);
+    stroke(settings.stroke);
+
+    var xstart = random(10);
+    var ynoise = random(10);
+
+    for (let y = - settings.range.height.value / 2.0; y <= settings.range.height.value / 2.0; y += settings.step.value) {
+      ynoise += settings.noiseIncrement.y.value;
+      var xnoise = xstart;
+
+      for (let x = - settings.range.width.value / 2.0; x <= settings.range.width.value / 2.0; x += settings.step.value){
+        xnoise += settings.noiseIncrement.x.value;
+        drawPoint(x, y, noise(xnoise, ynoise)); // noise makes perlin noise between 0 and 1
+      }
+    }
+
+    function drawPoint(x, y, noiseFactor) {
+      push();
+      translate(x * noiseFactor * settings.translateRatio.value, y * noiseFactor * settings.translateRatio.value, -y);
+      var edgeSize = noiseFactor * settings.edgeSizeRatio.value;
+      ellipse(x, y, edgeSize, edgeSize);
+      pop();
+    }
+  }
+  </script>
+
+</html>
